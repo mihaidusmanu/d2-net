@@ -19,9 +19,9 @@ conda install pytorch torchvision cudatoolkit=8.0 -c pytorch
 conda install h5py imageio imagesize matplotlib numpy scipy tqdm
 ```
 
-Due to a [bug](https://github.com/pytorch/pytorch/issues/15054) in a recent version of CUDNN, the runtime is severely 
+Due to a [bug](https://github.com/pytorch/pytorch/issues/15054) in a recent version of cuDNN, the runtime is severely 
 affected on CUDA 9+. Thus, for the moment, we suggest sticking to CUDA 8 (or compiling PyTorch from sources with the 
-latest CUDNN version).
+latest cuDNN version).
 
 ## Downloading the models
 
@@ -53,8 +53,9 @@ python extract_features.py --image_list_file images.txt (--multiscale)
 ## Tuning on MegaDepth
 
 The training pipeline provided here is a PyTorch implementation of the TensorFlow code that was used to train the model 
-available to download above. We ran a reproducibility study and the performance was similar - the TF weights yielded 
-slightly better MMA (~3% difference) on the HPatches image pairs dataset. We might release new weights in the future!
+available to download above. The TensorFlow model yielded a slightly better MMA (~3% difference) on the HPatches image 
+pairs dataset. However, this implementation can be adapted more easily to different datasets and also supports batch 
+training. We plan on releasing a retrained model in the future!
 
 ### Downloading and preprocessing the MegaDepth dataset
 
@@ -75,6 +76,7 @@ the SfM models.
 After downloading and preprocessing MegaDepth, the training can be started right away:
 
 ```bash
+bash prepare_for_training.sh
 python train.py --use_validation --dataset_path /local/dataset/megadepth --scene_info_path /local/dataset/megadepth/scene_info
 ```
 
