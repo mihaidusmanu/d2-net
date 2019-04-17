@@ -1,0 +1,6 @@
+__pycache__
+.idea
+checkpoints*
+train_vis
+models
+log.txt
