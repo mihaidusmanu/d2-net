@@ -5,8 +5,8 @@ if [[ $# != 2 ]]; then
     exit
 fi
 
-dataset_path=$1
-output_path=$2
+export dataset_path=$1
+export output_path=$2
 
 echo 0
 ls $dataset_path/MegaDepth_v1_SfM | xargs -P 8 -I % sh -c 'echo %; python preprocess_scene.py --base_path $dataset_path --scene_id % --subscene_id 0 --output_path $output_path'
