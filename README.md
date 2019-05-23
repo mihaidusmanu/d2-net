@@ -31,7 +31,10 @@ The off-the-shelf Caffe VGG16 weights and their tuned counterpart can be downloa
 mkdir models
 wget https://dsmn.ml/files/d2-net/d2_ots.pth -O models/d2_ots.pth
 wget https://dsmn.ml/files/d2-net/d2_tf.pth -O models/d2_tf.pth
+wget https://dsmn.ml/files/d2-net/d2_tf_no_phototourism.pth -O models/d2_tf_no_phototourism.pth
 ```
+
+**Update - 23 May 2019** We have added a new set of weights trained on MegaDepth without the PhotoTourism scenes (sagrada_familia - 0019, british_museum - 0024, lincoln_memorial_statue - 0021, london_bridge - 0025, us_capitol - 0078, mount_rushmore - 1589). Our initial results show similar performance. In order to use these weights at test time, you should add `-model_file models/d2_tf_no_phototourism.pth`.
 
 ## Feature extraction
 
