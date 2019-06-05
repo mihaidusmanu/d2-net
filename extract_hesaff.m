@@ -1,4 +1,4 @@
-fid = fopen('hp_seq.txt');
+fid = fopen('image_list_hpatches_sequences.txt');
 
 tline = fgetl(fid);
 while ischar(tline)
