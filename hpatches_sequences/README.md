@@ -8,6 +8,8 @@ New methods can be added in cell 4 of the notebook. The local features are suppo
 
 - `keypoints` - `N x 2` matrix with `x, y` coordinates of each keypoint in COLMAP format (the `X` axis points to the right, the `Y` axis to the bottom)
 
+- `scores` - `N` array with detection scores for each keypoint (higher is better) - only required for the "top K" version of the benchmark
+
 - `descriptors` - `N x D` matrix with the descriptors (L2 normalized if you plan on using the provided mutual nearest neighbors matcher)
 
 Moreover, the `npz` files are supposed to be saved alongside their corresponding images with the same extension as the `method` (e.g. if `method = d2-net`, the features for the image `hpatches-sequences-release/i_ajuntament/1.ppm` should be in the file `hpatches-sequences-release/i_ajuntament/1.ppm.d2-net`).
