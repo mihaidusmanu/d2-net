@@ -1,4 +1,4 @@
-fid = fopen('image_list_hpatches_sequences.txt');
+fid = fopen('hp_seq.txt');
 
 tline = fgetl(fid);
 while ischar(tline)
@@ -14,9 +14,10 @@ while ischar(tline)
                                 'DoubleImage', false, ...
                                 'peakThreshold', 14 / 256^2);
     keypoints = F';
+    scores = info.peakScores;
     descriptors = D';
     
-    save([tline '.hesaff'], 'keypoints', 'descriptors');
+    save([tline '.hesaff'], 'keypoints', 'scores', 'descriptors');
     
     tline = fgetl(fid);
 end

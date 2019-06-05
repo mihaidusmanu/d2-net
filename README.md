@@ -37,7 +37,8 @@ wget https://dsmn.ml/files/d2-net/d2_tf_no_phototourism.pth -O models/d2_tf_no_p
 
 The output format can be either [`npz`](https://docs.scipy.org/doc/numpy/reference/generated/numpy.savez.html) or `mat`. In either case, the feature files encapsulate two arrays: 
 
-- `keypoints` - `N x 4` array containing the positions of keypoints `x, y`, the scales `s`, and the activation values `a`. The positions follow the COLMAP format, with the `X` axis pointing to the right and the `Y` axis to the bottom.
+- `keypoints` - `N x 4` array containing the positions of keypoints `x, y` and the scales `s`. The positions follow the COLMAP format, with the `X` axis pointing to the right and the `Y` axis to the bottom.
+- `scores` - `N` containing the activations of keypoints (higher is better).
 - `descriptors` - `N x 512` array containing the L2 normalized descriptors.
 
 ```bash
