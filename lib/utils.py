@@ -40,7 +40,6 @@ def imshow_image(image, preprocessing=None):
         mean = np.array([0.485, 0.456, 0.406])
         std = np.array([0.229, 0.224, 0.225])
         image = image * std.reshape([3, 1, 1]) + mean.reshape([3, 1, 1])
- 
         image *= 255.0
     else:
         raise ValueError('Unknown preprocessing parameter.')
@@ -50,12 +49,16 @@ def imshow_image(image, preprocessing=None):
 
 
 def grid_positions(h, w, device, matrix=False):
-    lines = torch.arange(0, h, device=device).view(-1, 1).float().repeat(1, w) # [h, w]
-    columns = torch.arange(0, w, device=device).view(1, -1).float().repeat(h, 1) # [h, w]
+    lines = torch.arange(
+        0, h, device=device
+    ).view(-1, 1).float().repeat(1, w)
+    columns = torch.arange(
+        0, w, device=device
+    ).view(1, -1).float().repeat(h, 1)
     if matrix:
         return torch.stack([lines, columns], dim=0)
     else:
-        return torch.cat([lines.view(1, -1), columns.view(1, -1)], dim=0) # [2, h * w]
+        return torch.cat([lines.view(1, -1), columns.view(1, -1)], dim=0)
 
 
 def upscale_positions(pos, scaling_steps=0):
@@ -66,7 +69,7 @@ def upscale_positions(pos, scaling_steps=0):
 
 def downscale_positions(pos, scaling_steps=0):
     for _ in range(scaling_steps):
-        pos = (pos - 0.5) / 2 
+        pos = (pos - 0.5) / 2
     return pos
 
 
@@ -79,7 +82,7 @@ def interpolate_dense_features(pos, dense_features, return_corners=False):
 
     i = pos[0, :]
     j = pos[1, :]
-    
+
     # Valid corners
     i_top_left = torch.floor(i).long()
     j_top_left = torch.floor(j).long()
@@ -101,10 +104,10 @@ def interpolate_dense_features(pos, dense_features, return_corners=False):
         torch.min(valid_top_left, valid_top_right),
         torch.min(valid_bottom_left, valid_bottom_right)
     )
-    
+
     i_top_left = i_top_left[valid_corners]
     j_top_left = j_top_left[valid_corners]
-    
+
     i_top_right = i_top_right[valid_corners]
     j_top_right = j_top_right[valid_corners]
 
@@ -117,7 +120,7 @@ def interpolate_dense_features(pos, dense_features, return_corners=False):
     ids = ids[valid_corners]
     if ids.size(0) == 0:
         raise EmptyTensorError
- 
+
     # Interpolation
     i = i[ids]
     j = j[ids]
@@ -136,12 +139,12 @@ def interpolate_dense_features(pos, dense_features, return_corners=False):
     )
 
     pos = torch.cat([i.view(1, -1), j.view(1, -1)], dim=0)
-    
+
     if not return_corners:
         return [descriptors, pos, ids]
     else:
         corners = torch.stack([
-            torch.stack([i_top_left, j_top_left], dim=0), 
+            torch.stack([i_top_left, j_top_left], dim=0),
             torch.stack([i_top_right, j_top_right], dim=0),
             torch.stack([i_bottom_left, j_bottom_left], dim=0),
             torch.stack([i_bottom_right, j_bottom_right], dim=0)
@@ -150,15 +153,15 @@ def interpolate_dense_features(pos, dense_features, return_corners=False):
 
 
 def savefig(filepath, fig=None, dpi=None):
-    # TomNorway - https://stackoverflow.com/questions/11837979/removing-white-space-around-a-saved-image-in-matplotlib
+    # TomNorway - https://stackoverflow.com/a/53516034
     if not fig:
         fig = plt.gcf()
-    
+
     plt.subplots_adjust(0, 0, 1, 1, 0, 0)
     for ax in fig.axes:
         ax.axis('off')
         ax.margins(0, 0)
         ax.xaxis.set_major_locator(plt.NullLocator())
         ax.yaxis.set_major_locator(plt.NullLocator())
-    
+
     fig.savefig(filepath, pad_inches=0, bbox_inches='tight', dpi=dpi)
