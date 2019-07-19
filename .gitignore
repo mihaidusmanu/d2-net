@@ -7,5 +7,6 @@ log.txt
 hpatches_sequences/hseq.pdf
 hpatches_sequences/hpatches-sequences-release*
 hpatches_sequences/cache/
-hpatches_sequences/.ipynb_checkpoints
+.ipynb_checkpoints
 vlfeat
+*.d2-net
