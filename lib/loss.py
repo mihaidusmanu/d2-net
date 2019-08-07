@@ -19,7 +19,7 @@ matplotlib.use('Agg')
 
 
 def loss_function(
-        model, batch, device, margin=1, safe_radius=4, scaling_steps=3
+        model, batch, device, margin=1, safe_radius=4, scaling_steps=3, plot=False
 ):
     output = model({
         'image1': batch['image1'].to(device),
@@ -127,10 +127,11 @@ def loss_function(
             torch.sum(scores1 * scores2 * F.relu(margin + diff)) /
             torch.sum(scores1 * scores2)
         )
+
         has_grad = True
         n_valid_samples += 1
 
-        if batch['batch_idx'] % batch['log_interval'] == 0:
+        if plot and batch['batch_idx'] % batch['log_interval'] == 0:
             pos1_aux = pos1.cpu().numpy()
             pos2_aux = pos2.cpu().numpy()
             k = pos1_aux.shape[1]
@@ -171,7 +172,7 @@ def loss_function(
                 cmap='Reds'
             )
             plt.axis('off')
-            savefig('train_vis/%s/%02d.%02d.%d.png' % (
+            savefig('train_vis/%s.%02d.%02d.%d.png' % (
                 'train' if batch['train'] else 'valid',
                 batch['epoch_idx'],
                 batch['batch_idx'] // batch['log_interval'],

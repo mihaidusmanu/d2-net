@@ -20,9 +20,6 @@ from lib.exceptions import NoGradientError
 from lib.loss import loss_function
 from lib.model import D2Net
 
-# Ignore EXIF warnings
-warnings.filterwarnings("ignore", "Corrupt EXIF data", UserWarning)
-warnings.filterwarnings("ignore", "Possibly corrupt EXIF data", UserWarning)
 
 # CUDA
 use_cuda = torch.cuda.is_available()
@@ -56,7 +53,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '--num_epochs', type=int, default=50,
+    '--num_epochs', type=int, default=10,
     help='number of training epochs'
 )
 parser.add_argument(
@@ -68,7 +65,7 @@ parser.add_argument(
     help='batch size'
 )
 parser.add_argument(
-    '--num_workers', type=int, default=8,
+    '--num_workers', type=int, default=4,
     help='number of workers for data loading'
 )
 
@@ -79,13 +76,20 @@ parser.add_argument(
 parser.set_defaults(use_validation=False)
 
 parser.add_argument(
-    '--log_interval', type=int, default=500,
+    '--log_interval', type=int, default=250,
     help='loss logging interval'
 )
+
 parser.add_argument(
     '--log_file', type=str, default='log.txt',
     help='loss logging file'
 )
+
+parser.add_argument(
+    '--plot', dest='plot', action='store_true',
+    help='plot training pairs'
+)
+parser.set_defaults(plot=False)
 
 parser.add_argument(
     '--checkpoint_directory', type=str, default='checkpoints',
@@ -100,6 +104,14 @@ args = parser.parse_args()
 
 print(args)
 
+# Create the folders for plotting if need be
+if args.plot:
+    plot_path = 'train_vis'
+    if os.path.isdir(plot_path):
+        print('[Warning] Plotting directory already exists.')
+    else:
+        os.mkdir(dir_name)
+
 # Creating CNN model
 model = D2Net(
     model_file=args.model_file,
@@ -109,9 +121,6 @@ model = D2Net(
 # Optimizer
 optimizer = optim.Adam(
     filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr
-)
-scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-    optimizer, factor=0.1, patience=2, verbose=True
 )
 
 # Dataset
@@ -166,7 +175,7 @@ def process_epoch(
         batch['log_interval'] = args.log_interval
 
         try:
-            loss = loss_function(model, batch, device)
+            loss = loss_function(model, batch, device, plot=args.plot)
         except NoGradientError:
             continue
 
@@ -196,10 +205,11 @@ def process_epoch(
 
 
 # Create the checkpoint directory
-if not os.path.isdir(args.checkpoint_directory):
-    os.mkdir(args.checkpoint_directory)
-else:
+if os.path.isdir(args.checkpoint_directory):
     print('[Warning] Checkpoint directory already exists.')
+else:
+    os.mkdir(args.checkpoint_directory)
+    
 
 # Open the log file for writing
 if os.path.exists(args.log_file):
@@ -239,8 +249,6 @@ for epoch_idx in range(1, args.num_epochs + 1):
                 train=False
             )
         )
-        # Update LR if need be
-        scheduler.step(validation_loss_history[-1])
 
     # Save the current checkpoint
     checkpoint_path = os.path.join(

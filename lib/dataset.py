@@ -9,6 +9,8 @@ import os
 import torch
 from torch.utils.data import Dataset
 
+import time
+
 from tqdm import tqdm
 
 from lib.utils import preprocess_image
@@ -61,55 +63,59 @@ class MegaDepthDataset(Dataset):
             print('Building a new training dataset...')
         for scene in tqdm(self.scenes, total=len(self.scenes)):
             scene_info_path = os.path.join(
-                self.scene_info_path, '%s.0.npz' % scene
+                self.scene_info_path, '%s.npz' % scene
             )
             if not os.path.exists(scene_info_path):
                 continue
             scene_info = np.load(scene_info_path, allow_pickle=True)
             overlap_matrix = scene_info['overlap_matrix']
             scale_ratio_matrix = scene_info['scale_ratio_matrix']
-            valid = np.logical_and(
+
+            valid =  np.logical_and(
                 np.logical_and(
                     overlap_matrix >= self.min_overlap_ratio,
                     overlap_matrix <= self.max_overlap_ratio
                 ),
-                np.logical_and(
-                    scale_ratio_matrix <= self.max_scale_ratio,
-                    scale_ratio_matrix >= 1. / self.max_scale_ratio
-                )
+                scale_ratio_matrix <= self.max_scale_ratio
             )
-            pairs = np.where(valid)
-            pairs = np.vstack(pairs)
+            
+            pairs = np.vstack(np.where(valid))
             try:
                 selected_ids = np.random.choice(
                     pairs.shape[1], self.pairs_per_scene
                 )
             except:
                 continue
+            
             image_paths = scene_info['image_paths']
             depth_paths = scene_info['depth_paths']
             points3D_id_to_2D = scene_info['points3D_id_to_2D']
+            points3D_id_to_ndepth = scene_info['points3D_id_to_ndepth']
             intrinsics = scene_info['intrinsics']
             poses = scene_info['poses']
-            fact_x = scene_info['fact_x']
-            fact_y = scene_info['fact_y']
+            
             for pair_idx in selected_ids:
                 idx1 = pairs[0, pair_idx]
                 idx2 = pairs[1, pair_idx]
-                matches = list(
+                matches = np.array(list(
                     points3D_id_to_2D[idx1].keys() &
                     points3D_id_to_2D[idx2].keys()
-                )
+                ))
+
+                # Scale filtering
+                matches_nd1 = np.array([points3D_id_to_ndepth[idx1][match] for match in matches])
+                matches_nd2 = np.array([points3D_id_to_ndepth[idx2][match] for match in matches])
+                scale_ratio = np.maximum(matches_nd1 / matches_nd2, matches_nd2 / matches_nd1)
+                matches = matches[np.where(scale_ratio <= self.max_scale_ratio)[0]]
+                
                 point3D_id = np.random.choice(matches)
-                fact_x1 = fact_x[idx1]
-                fact_x2 = fact_x[idx2]
-                fact_y1 = fact_y[idx1]
-                fact_y2 = fact_y[idx2]
                 point2D1 = points3D_id_to_2D[idx1][point3D_id]
                 point2D2 = points3D_id_to_2D[idx2][point3D_id]
+                nd1 = points3D_id_to_ndepth[idx1][point3D_id]
+                nd2 = points3D_id_to_ndepth[idx2][point3D_id]
                 central_match = np.array([
-                    point2D1[1] * fact_y1, point2D1[0] * fact_x1,
-                    point2D2[1] * fact_y2, point2D2[0] * fact_x2
+                    point2D1[1], point2D1[0],
+                    point2D2[1], point2D2[0]
                 ])
                 self.dataset.append({
                     'image_path1': image_paths[idx1],
@@ -120,7 +126,8 @@ class MegaDepthDataset(Dataset):
                     'depth_path2': depth_paths[idx2],
                     'intrinsics2': intrinsics[idx2],
                     'pose2': poses[idx2],
-                    'central_match': central_match
+                    'central_match': central_match,
+                    'scale_ratio': max(nd1 / nd2, nd2 / nd1)
                 })
         np.random.shuffle(self.dataset)
         if not self.train:
@@ -135,15 +142,15 @@ class MegaDepthDataset(Dataset):
         )
         with h5py.File(depth_path1, 'r') as hdf5_file:
             depth1 = np.array(hdf5_file['/depth'])
-        assert(not (np.min(depth1) < 0))
+        assert(np.min(depth1) >= 0)
         image_path1 = os.path.join(
             self.base_path, pair_metadata['image_path1']
         )
         image1 = Image.open(image_path1)
         if image1.mode != 'RGB':
             image1 = image1.convert('RGB')
-        image1 = image1.resize(depth1.shape[:: -1])
         image1 = np.array(image1)
+        assert(image1.shape[0] == depth1.shape[0] and image1.shape[1] == depth1.shape[1])
         intrinsics1 = pair_metadata['intrinsics1']
         pose1 = pair_metadata['pose1']
 
@@ -152,15 +159,15 @@ class MegaDepthDataset(Dataset):
         )
         with h5py.File(depth_path2, 'r') as hdf5_file:
             depth2 = np.array(hdf5_file['/depth'])
-        assert(not (np.min(depth2) < 0))
+        assert(np.min(depth2) >= 0)
         image_path2 = os.path.join(
             self.base_path, pair_metadata['image_path2']
         )
         image2 = Image.open(image_path2)
         if image2.mode != 'RGB':
             image2 = image2.convert('RGB')
-        image2 = image2.resize(depth2.shape[:: -1])
         image2 = np.array(image2)
+        assert(image2.shape[0] == depth2.shape[0] and image2.shape[1] == depth2.shape[1])
         intrinsics2 = pair_metadata['intrinsics2']
         pose2 = pair_metadata['pose2']
 

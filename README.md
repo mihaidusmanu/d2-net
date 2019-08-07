@@ -20,7 +20,7 @@ conda install h5py imageio imagesize matplotlib numpy scipy tqdm
 
 ## Downloading the models
 
-The off-the-shelf Caffe VGG16 weights and their tuned counterpart can be downloaded by running:
+The off-the-shelf **Caffe VGG16** weights and their tuned counterpart can be downloaded by running:
 
 ```bash
 mkdir models
@@ -33,7 +33,7 @@ wget https://dsmn.ml/files/d2-net/d2_tf_no_phototourism.pth -O models/d2_tf_no_p
 
 ## Feature extraction
 
-`extract_features.py` can be used to extract D2 features for a given list of images. The singlescale features require less than 6GB of VRAM for 1200x1600 images. The `--multiscale` flag can be used to extract multiscale features - for this, we recommend at least 16GB of VRAM. 
+`extract_features.py` can be used to extract D2 features for a given list of images. The singlescale features require less than 6GB of VRAM for 1200x1600 images. The `--multiscale` flag can be used to extract multiscale features - for this, we recommend at least 12GB of VRAM. 
 
 The output format can be either [`npz`](https://docs.scipy.org/doc/numpy/reference/generated/numpy.savez.html) or `mat`. In either case, the feature files encapsulate two arrays: 
 
@@ -51,22 +51,32 @@ The training pipeline provided here is a PyTorch implementation of the TensorFlo
 
 **Update - 05 June 2019** We have fixed a bug in the dataset preprocessing - retraining now yields similar results to the original TensorFlow implementation.
 
+**Update - 07 August 2019** We have released an updated, more accurate version of the training dataset - training is more stable and significantly faster for equal performance.
+
 ### Downloading and preprocessing the MegaDepth dataset
 
-After downloading the entire [MegaDepth](http://www.cs.cornell.edu/projects/megadepth/) dataset (including SfM models), `preprocess_megadepth.sh` can be used to retrieve the camera parameters and compute the overlap between images for all scenes. 
+For this part, [COLMAP](https://colmap.github.io/) should be installed. Please refer to the official website for installation instructions.
+
+After downloading the entire [MegaDepth](http://www.cs.cornell.edu/projects/megadepth/) dataset (including SfM models), the first step is generating the undistorted reconstructions. This can be done by calling `undistort_reconstructions.py` as follows:
 
 ```bash
-cd megadepth_utils
-bash preprocess_megadepth.sh /local/dataset/megadepth /local/dataset/megadepth/scenes_info
+python undistort_reconstructions.py --colmap_path /path/to/colmap/executable --base_path /path/to/megadepth
 ```
+
+Next, `preprocess_megadepth.sh` can be used to retrieve the camera parameters and compute the overlap between images for all scenes. 
+
+```bash
+bash preprocess_undistorted_megadepth.sh /path/to/megadepth /path/to/output/folder
+```
+
+In case you prefer downloading the undistorted reconstructions and aggregated scene information folder directly, feel free to contact me by e-mail. You will still need to download the depth maps ("MegaDepth v1 Dataset") from the MegaDepth website.
 
 ### Training
 
 After downloading and preprocessing MegaDepth, the training can be started right away:
 
 ```bash
-bash prepare_for_training.sh
-python train.py --use_validation --dataset_path /local/dataset/megadepth --scene_info_path /local/dataset/megadepth/scene_info
+python train.py --use_validation --dataset_path /path/to/megadepth --scene_info_path /path/to/preprocessing/output
 ```
 
 ## BibTeX
