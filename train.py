@@ -110,7 +110,7 @@ if args.plot:
     if os.path.isdir(plot_path):
         print('[Warning] Plotting directory already exists.')
     else:
-        os.mkdir(dir_name)
+        os.mkdir(plot_path)
 
 # Creating CNN model
 model = D2Net(
