@@ -4,7 +4,7 @@ Please check the [official repository](https://github.com/hpatches/hpatches-data
 
 The dataset can be downloaded by running `bash download.sh` - this script downloads and extracts the HPatches Sequences dataset and removes the sequences containing high resolution images (`> 1600x1200`) as mentioned in the D2-Net paper. You can also download the cache with results for all methods from the D2-Net paper by running `bash download_cache.sh`.
 
-New methods can be added in cell 4 of the notebook. The local features are supposed to be stored in the [`npz`](https://docs.scipy.org/doc/numpy/reference/generated/numpy.savez.html) format with two fields:
+New methods can be added in cell 4 of the notebook. The local features are supposed to be stored in the [`npz`](https://docs.scipy.org/doc/numpy/reference/generated/numpy.savez.html) format with three fields:
 
 - `keypoints` - `N x 2` matrix with `x, y` coordinates of each keypoint in COLMAP format (the `X` axis points to the right, the `Y` axis to the bottom)
 
