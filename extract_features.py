@@ -1,6 +1,10 @@
 import argparse
 
+import cv2
+
 import numpy as np
+
+import os
 
 import imageio
 
@@ -83,8 +87,16 @@ with open(args.image_list_file, 'r') as f:
     lines = f.readlines()
 for line in tqdm(lines, total=len(lines)):
     path = line.strip()
+    
+    # if os.path.exists(path +'.d2-net'):
+    #     continue
+    
+    try:
+        image = imageio.imread(path)
+    except:
+        print('Failed to read %s.' % path)
+        continue
 
-    image = imageio.imread(path)
     if len(image.shape) == 2:
         image = image[:, :, np.newaxis]
         image = np.repeat(image, 3, -1)
@@ -92,16 +104,20 @@ for line in tqdm(lines, total=len(lines)):
     # TODO: switch to PIL.Image due to deprecation of scipy.misc.imresize.
     resized_image = image
     if max(resized_image.shape) > args.max_edge:
-        resized_image = scipy.misc.imresize(
+        resized_image = cv2.resize(
             resized_image,
-            args.max_edge / max(resized_image.shape)
+            None,
+            fx=(args.max_edge / max(resized_image.shape)),
+            fy=(args.max_edge / max(resized_image.shape)),
         ).astype('float')
     if sum(resized_image.shape[: 2]) > args.max_sum_edges:
-        resized_image = scipy.misc.imresize(
+        resized_image = cv2.resize(
             resized_image,
-            args.max_sum_edges / sum(resized_image.shape[: 2])
+            None,
+            fx=(args.max_sum_edges / sum(resized_image.shape[: 2])),
+            fy=(args.max_sum_edges / sum(resized_image.shape[: 2])),
         ).astype('float')
-
+    
     fact_i = image.shape[0] / resized_image.shape[0]
     fact_j = image.shape[1] / resized_image.shape[1]
 
