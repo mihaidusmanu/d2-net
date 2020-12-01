@@ -45,6 +45,34 @@ The output format can be either [`npz`](https://docs.scipy.org/doc/numpy/referen
 python extract_features.py --image_list_file images.txt (--multiscale)
 ```
 
+# Feature extraction with kapture datasets
+
+Kapture is a pivot file format, based on text and binary files, used to describe SFM (Structure From Motion) and more generally sensor-acquired data.
+
+It is available at https://github.com/naver/kapture.
+It contains conversion tools for popular formats and several popular datasets are directly available in kapture.
+
+It can be installed with:
+```bash
+pip install kapture
+```
+
+Datasets can be downloaded with:
+```bash
+kapture_download_dataset.py update
+kapture_download_dataset.py list
+# e.g.: install mapping and query of Extended-CMU-Seasons_slice22
+kapture_download_dataset.py install "Extended-CMU-Seasons_slice22_*"
+```
+If you want to convert your own dataset into kapture, please find some examples [here](https://github.com/naver/kapture/blob/master/doc/datasets.adoc).
+
+Once installed, you can extract keypoints for your kapture dataset with:
+```bash
+python extract_kapture.py --kapture-root pathto/yourkapturedataset (--multiscale)
+```
+
+Run `python extract_kapture.py --help` for more information on the extraction parameters. 
+
 ## Tuning on MegaDepth
 
 The training pipeline provided here is a PyTorch implementation of the TensorFlow code that was used to train the model available to download above.
