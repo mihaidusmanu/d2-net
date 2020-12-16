@@ -54,6 +54,8 @@ class SoftDetectionModule(nn.Module):
 
         self.pad = self.soft_local_max_size // 2
 
+        self.eps = 1e-6
+
     def forward(self, batch):
         b = batch.size(0)
 
@@ -71,12 +73,12 @@ class SoftDetectionModule(nn.Module):
         local_max_score = exp / sum_exp
 
         depth_wise_max = torch.max(batch, dim=1)[0]
-        depth_wise_max_score = batch / depth_wise_max.unsqueeze(1)
+        depth_wise_max_score = batch / (depth_wise_max.unsqueeze(1) + self.eps)
 
         all_scores = local_max_score * depth_wise_max_score
         score = torch.max(all_scores, dim=1)[0]
-
-        score = score / torch.sum(score.view(b, -1), dim=1).view(b, 1, 1)
+        
+        score = score / (torch.sum(score.view(b, -1), dim=1).view(b, 1, 1) + self.eps)
 
         return score
 

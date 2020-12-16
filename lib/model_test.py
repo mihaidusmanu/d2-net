@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from lib.model import SoftDetectionModule
+
 
 class DenseFeatureExtractionModule(nn.Module):
     def __init__(self, use_relu=True, use_cuda=True):
@@ -54,6 +56,8 @@ class D2Net(nn.Module):
         )
 
         self.detection = HardDetectionModule()
+
+        self.soft_detection = SoftDetectionModule()
 
         self.localization = HandcraftedLocalizationModule()
 

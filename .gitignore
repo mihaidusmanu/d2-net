@@ -12,3 +12,4 @@ hpatches_sequences/cache-top
 .ipynb_checkpoints
 vlfeat
 *.d2-net
+image_list_aachen.txt

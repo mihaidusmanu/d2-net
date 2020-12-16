@@ -66,6 +66,15 @@ parser.add_argument(
 parser.set_defaults(multiscale=False)
 
 parser.add_argument(
+    '--soft_threshold', type=float, default=1.01,
+    help='relative threshold for soft detection'
+)
+parser.add_argument(
+    '--top_k', type=int, default=None,
+    help='only returns top K features'
+)
+
+parser.add_argument(
     '--no-relu', dest='use_relu', action='store_false',
     help='remove ReLU after the dense feature extraction module'
 )
@@ -87,10 +96,7 @@ with open(args.image_list_file, 'r') as f:
     lines = f.readlines()
 for line in tqdm(lines, total=len(lines)):
     path = line.strip()
-    
-    # if os.path.exists(path +'.d2-net'):
-    #     continue
-    
+
     try:
         image = imageio.imread(path)
     except:
@@ -101,7 +107,6 @@ for line in tqdm(lines, total=len(lines)):
         image = image[:, :, np.newaxis]
         image = np.repeat(image, 3, -1)
 
-    # TODO: switch to PIL.Image due to deprecation of scipy.misc.imresize.
     resized_image = image
     if max(resized_image.shape) > args.max_edge:
         resized_image = cv2.resize(
@@ -121,26 +126,18 @@ for line in tqdm(lines, total=len(lines)):
     fact_i = image.shape[0] / resized_image.shape[0]
     fact_j = image.shape[1] / resized_image.shape[1]
 
-    input_image = preprocess_image(
-        resized_image,
-        preprocessing=args.preprocessing
-    )
     with torch.no_grad():
         if args.multiscale:
             keypoints, scores, descriptors = process_multiscale(
-                torch.tensor(
-                    input_image[np.newaxis, :, :, :].astype(np.float32),
-                    device=device
-                ),
-                model
+                resized_image,
+                model, device,
+                soft_threshold=args.soft_threshold
             )
         else:
             keypoints, scores, descriptors = process_multiscale(
-                torch.tensor(
-                    input_image[np.newaxis, :, :, :].astype(np.float32),
-                    device=device
-                ),
-                model,
+                resized_image,
+                model, device,
+                soft_threshold=args.soft_threshold,
                 scales=[1]
             )
 
@@ -149,6 +146,12 @@ for line in tqdm(lines, total=len(lines)):
     keypoints[:, 1] *= fact_j
     # i, j -> u, v
     keypoints = keypoints[:, [1, 0, 2]]
+
+    if args.top_k is not None:
+        ids = np.argsort(scores)[:: -1][: args.top_k]
+        keypoints = keypoints[ids, :]
+        scores = scores[ids]
+        descriptors = descriptors[ids, :]
 
     if args.output_type == 'npz':
         with open(path + args.output_extension, 'wb') as output_file:
