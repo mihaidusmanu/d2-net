@@ -8,7 +8,23 @@ M. Dusmanu, I. Rocco, T. Pajdla, M. Pollefeys, J. Sivic, A. Torii, and T. Sattle
 ```
 
 [Paper on arXiv](https://arxiv.org/abs/1905.03561), [Project page](https://dsmn.ml/publications/d2-net.html)
-    
+
+## Dev branch info
+
+List of changes with respect to the main branch:
+- **Switch to OpenCV for image resizing and image pyramid**
+- **Remove the banning mechanism in multiscale detection** (it was giving priority to worse localized keypoints)
+- **Use the soft scores as keypoint scores** (the soft scores should be comparable between pixels unlike the values of activations from different feature maps)
+- **Use a soft score threshold at test time** (this should filter out most erroneous featuress, e.g., in the sky or in homogeneous regions)
+- **Minor changes to avoid NaNs in training**
+
+The performance is similar to that of the main branch on Aachen Day-Night v1.0:
+
+| Methods | Aachen day | Aachen night | Retrieval |
+| - | - | - | - |
+| [D2-Net MS](https://www.visuallocalization.net/details/965/) | 85.2 / 92.5 / 97.8 | 86.7 / 89.8 / 98.0  | NetVLAD top 50 |
+| D2-Net MS dev | 85.7 / 93.4 / 97.5 | 82.7 / 89.8 / 98.0  | NetVLAD top 50 |
+
 ## Getting started
 
 Python 3.6+ is recommended for running our code. [Conda](https://docs.conda.io/en/latest/) can be used to install the required packages:
