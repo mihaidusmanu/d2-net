@@ -14,7 +14,6 @@ from tqdm import tqdm
 
 import scipy
 import scipy.io
-import scipy.misc
 
 from lib.model_test import D2Net
 from lib.utils import preprocess_image
