@@ -36,7 +36,7 @@ parser.add_argument(
     help='image preprocessing (caffe or torch)'
 )
 parser.add_argument(
-    '--model_file', type=str, default='models/d2_tf.pth',
+    '--model_file', type=str, default='models/d2.pth',
     help='path to the full model'
 )
 

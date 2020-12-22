@@ -70,12 +70,6 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '--use_validation', dest='use_validation', action='store_true',
-    help='use the validation split'
-)
-parser.set_defaults(use_validation=False)
-
-parser.add_argument(
     '--log_interval', type=int, default=250,
     help='loss logging interval'
 )
@@ -124,23 +118,8 @@ optimizer = optim.Adam(
 )
 
 # Dataset
-if args.use_validation:
-    validation_dataset = MegaDepthDataset(
-        scene_list_path='megadepth_utils/valid_scenes.txt',
-        scene_info_path=args.scene_info_path,
-        base_path=args.dataset_path,
-        train=False,
-        preprocessing=args.preprocessing,
-        pairs_per_scene=25
-    )
-    validation_dataloader = DataLoader(
-        validation_dataset,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers
-    )
-
 training_dataset = MegaDepthDataset(
-    scene_list_path='megadepth_utils/train_scenes.txt',
+    scene_list_path='megadepth_utils/scenes.txt',
     scene_info_path=args.scene_info_path,
     base_path=args.dataset_path,
     preprocessing=args.preprocessing
@@ -218,15 +197,6 @@ log_file = open(args.log_file, 'a+')
 
 # Initialize the history
 train_loss_history = []
-validation_loss_history = []
-if args.use_validation:
-    validation_dataset.build_dataset()
-    min_validation_loss = process_epoch(
-        0,
-        model, loss_function, optimizer, validation_dataloader, device,
-        log_file, args,
-        train=False
-    )
 
 # Start the training
 for epoch_idx in range(1, args.num_epochs + 1):
@@ -240,16 +210,6 @@ for epoch_idx in range(1, args.num_epochs + 1):
         )
     )
 
-    if args.use_validation:
-        validation_loss_history.append(
-            process_epoch(
-                epoch_idx,
-                model, loss_function, optimizer, validation_dataloader, device,
-                log_file, args,
-                train=False
-            )
-        )
-
     # Save the current checkpoint
     checkpoint_path = os.path.join(
         args.checkpoint_directory,
@@ -260,20 +220,9 @@ for epoch_idx in range(1, args.num_epochs + 1):
         'epoch_idx': epoch_idx,
         'model': model.state_dict(),
         'optimizer': optimizer.state_dict(),
-        'train_loss_history': train_loss_history,
-        'validation_loss_history': validation_loss_history
+        'train_loss_history': train_loss_history
     }
     torch.save(checkpoint, checkpoint_path)
-    if (
-        args.use_validation and
-        validation_loss_history[-1] < min_validation_loss
-    ):
-        min_validation_loss = validation_loss_history[-1]
-        best_checkpoint_path = os.path.join(
-            args.checkpoint_directory,
-            '%s.best.pth' % args.checkpoint_prefix
-        )
-        shutil.copy(checkpoint_path, best_checkpoint_path)
 
 # Close the log file
 log_file.close()

@@ -17,15 +17,20 @@ List of changes with respect to the main branch:
 - **Use the soft scores as keypoint scores** (the soft scores should be comparable between pixels unlike the values of activations from different feature maps)
 - **Use a soft score threshold at test time** (this should filter out most spurious features, e.g., in the sky or in homogeneous regions)
 - **Minor changes to avoid NaNs in training**
+- **Removed validation split**
+- **Switched to the "curated" version of MegaDepth** (removed scenes with inconsistent depth maps and scenes overlapping with PhotoTourism, c.f. Dusmanu et al., ECCV 2020 and Tyszkiewicz et al., NeurIPS 2020)
 
 The performance is similar to that of the main branch on Aachen Day-Night v1.0:
 
 | Methods | Aachen day | Aachen night | Retrieval |
 | - | - | - | - |
-| [[main] D2-Net MS - unlimited](https://www.visuallocalization.net/details/965/) | 85.2 / 92.5 / 97.8 | 86.7 / 89.8 / 98.0 | NetVLAD top 50 |
-| [dev] D2-Net MS - unlimited | 85.7 / 93.4 / 97.5 | 82.7 / 89.8 / 98.0 | NetVLAD top 50 |
+| [[main] D2-Net MS](https://www.visuallocalization.net/details/965/) | 85.2 / 92.5 / 97.8 | 86.7 / 89.8 / 98.0 | NetVLAD top 50 |
+| [dev] D2-Net MS | 85.7 / 93.4 / 97.5 | 82.7 / 89.8 / 98.0 | NetVLAD top 50 |
 | [dev] D2-Net MS dev - 10K | 85.2 / 92.5 / 97.3 | 83.7 / 89.8 / 98.0 | NetVLAD top 50 |
-| [dev] D2-Net MS dev - 5K | 83.3 / 92.2 / 96.8 | 76.5 / 88.8 / 95.9 | NetVLAD top 50 |
+| [dev] [retrain] D2-Net MS | 86.0 / 93.1 / 97.7 | 80.6 / 88.8 / 98.0 | NetVLAD top 50 |
+| [dev] [retrain] D2-Net MS dev - 10K | 85.0 / 92.5 / 97.2 | 83.7 / 91.8 / 98.0 | NetVLAD top 50 |
+| [dev] [retrain-curated] D2-Net MS | 85.6 / 93.4 / 97.5 | 82.7 / 91.8 / 98.0 | NetVLAD top 50 |
+| [dev] [retrain-curated] D2-Net MS dev - 10K | 85.2 / 93.1 / 97.7 | 80.6 / 90.8 / 96.9 | NetVLAD top 50 |
 
 ## Getting started
 
@@ -44,11 +49,8 @@ The off-the-shelf **Caffe VGG16** weights and their tuned counterpart can be dow
 ```bash
 mkdir models
 wget https://dsmn.ml/files/d2-net/d2_ots.pth -O models/d2_ots.pth
-wget https://dsmn.ml/files/d2-net/d2_tf.pth -O models/d2_tf.pth
-wget https://dsmn.ml/files/d2-net/d2_tf_no_phototourism.pth -O models/d2_tf_no_phototourism.pth
+wget https://dsmn.ml/files/d2-net/dev/d2.pth -O models/d2.pth
 ```
-
-**Update - 23 May 2019** We have added a new set of weights trained on MegaDepth without the PhotoTourism scenes (sagrada_familia - 0019, lincoln_memorial_statue - 0021, british_museum - 0024, london_bridge - 0025, us_capitol - 0078, mount_rushmore - 1589). Our initial results show similar performance. In order to use these weights at test time, you should add `--model_file models/d2_tf_no_phototourism.pth`.
 
 ## Feature extraction
 
@@ -67,10 +69,6 @@ python extract_features.py --image_list_file images.txt (--multiscale)
 ## Tuning on MegaDepth
 
 The training pipeline provided here is a PyTorch implementation of the TensorFlow code that was used to train the model available to download above.
-
-**Update - 05 June 2019** We have fixed a bug in the dataset preprocessing - retraining now yields similar results to the original TensorFlow implementation.
-
-**Update - 07 August 2019** We have released an updated, more accurate version of the training dataset - training is more stable and significantly faster for equal performance.
 
 ### Downloading and preprocessing the MegaDepth dataset
 
