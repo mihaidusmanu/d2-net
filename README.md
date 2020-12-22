@@ -48,8 +48,9 @@ The off-the-shelf **Caffe VGG16** weights and their tuned counterpart can be dow
 
 ```bash
 mkdir models
+mkdir models/dev
 wget https://dsmn.ml/files/d2-net/d2_ots.pth -O models/d2_ots.pth
-wget https://dsmn.ml/files/d2-net/dev/d2.pth -O models/d2.pth
+wget https://dsmn.ml/files/d2-net/dev/d2.pth -O models/dev/d2.pth
 ```
 
 ## Feature extraction
