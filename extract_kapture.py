@@ -71,7 +71,7 @@ args = parser.parse_args()
 
 print(args)
 
-kdata = kapture_from_dir(args.kapture_root, matches_pairsfile_path=None, 
+kdata = kapture_from_dir(args.kapture_root, 
 skip_list= [kapture.GlobalFeatures,
             kapture.Matches,
             kapture.Points3d,
