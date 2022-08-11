@@ -97,8 +97,6 @@ Next, `preprocess_megadepth.sh` can be used to retrieve the camera parameters an
 bash preprocess_undistorted_megadepth.sh /path/to/megadepth /path/to/output/folder
 ```
 
-In case you prefer downloading the undistorted reconstructions and aggregated scene information folder directly, you can find them [here - Google Drive](https://drive.google.com/open?id=1hxpOsqOZefdrba_BqnW490XpNX_LgXPB). You will still need to download the depth maps ("MegaDepth v1 Dataset") from the MegaDepth website.
-
 ### Training
 
 After downloading and preprocessing MegaDepth, the training can be started right away:
