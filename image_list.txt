@@ -1,0 +1,2 @@
+qualitative/images/pair_4/1.jpg
+qualitative/images/pair_4/2.jpg
