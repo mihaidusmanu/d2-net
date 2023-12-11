@@ -7,7 +7,7 @@ This repository contains the implementation of the following paper:
 M. Dusmanu, I. Rocco, T. Pajdla, M. Pollefeys, J. Sivic, A. Torii, and T. Sattler. CVPR 2019.
 ```
 
-[Paper on arXiv](https://arxiv.org/abs/1905.03561), [Project page](https://dsmn.ml/publications/d2-net.html)
+[Paper on arXiv](https://arxiv.org/abs/1905.03561), [Project page](https://dusmanu.com/publications/d2-net.html)
     
 ## Getting started
 
@@ -24,9 +24,9 @@ The off-the-shelf **Caffe VGG16** weights and their tuned counterpart can be dow
 
 ```bash
 mkdir models
-wget https://dsmn.ml/files/d2-net/d2_ots.pth -O models/d2_ots.pth
-wget https://dsmn.ml/files/d2-net/d2_tf.pth -O models/d2_tf.pth
-wget https://dsmn.ml/files/d2-net/d2_tf_no_phototourism.pth -O models/d2_tf_no_phototourism.pth
+wget https://dusmanu.com/files/d2-net/d2_ots.pth -O models/d2_ots.pth
+wget https://dusmanu.com/files/d2-net/d2_tf.pth -O models/d2_tf.pth
+wget https://dusmanu.com/files/d2-net/d2_tf_no_phototourism.pth -O models/d2_tf_no_phototourism.pth
 ```
 
 **Update - 23 May 2019** We have added a new set of weights trained on MegaDepth without the PhotoTourism scenes (sagrada_familia - 0019, lincoln_memorial_statue - 0021, british_museum - 0024, london_bridge - 0025, us_capitol - 0078, mount_rushmore - 1589). Our initial results show similar performance. In order to use these weights at test time, you should add `--model_file models/d2_tf_no_phototourism.pth`.
