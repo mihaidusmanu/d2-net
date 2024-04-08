@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 import scipy
 import scipy.io
-import scipy.misc
+from PIL import Image
 
 from lib.model_test import D2Net
 from lib.utils import preprocess_image
@@ -84,23 +84,17 @@ with open(args.image_list_file, 'r') as f:
 for line in tqdm(lines, total=len(lines)):
     path = line.strip()
 
-    image = imageio.imread(path)
+    image = imageio.v2.imread(path)
     if len(image.shape) == 2:
         image = image[:, :, np.newaxis]
         image = np.repeat(image, 3, -1)
 
-    # TODO: switch to PIL.Image due to deprecation of scipy.misc.imresize.
     resized_image = image
     if max(resized_image.shape) > args.max_edge:
-        resized_image = scipy.misc.imresize(
-            resized_image,
-            args.max_edge / max(resized_image.shape)
-        ).astype('float')
+        resized_image = Image.fromarray(resized_image).resize(args.max_edge / max(resized_image.shape)).astype('float')
     if sum(resized_image.shape[: 2]) > args.max_sum_edges:
-        resized_image = scipy.misc.imresize(
-            resized_image,
-            args.max_sum_edges / sum(resized_image.shape[: 2])
-        ).astype('float')
+        resized_image = Image.fromarray(resized_image).resize(args.max_sum_edges / sum(resized_image.shape[: 2])).astype('float')
+            
 
     fact_i = image.shape[0] / resized_image.shape[0]
     fact_j = image.shape[1] / resized_image.shape[1]
